@@ -4,6 +4,7 @@ import { generateStudyPlan } from '@/ai/flows/generate-study-plan';
 import { summarizeEducationalText } from '@/ai/flows/summarize-educational-text';
 import { extractKeywordStudyTips } from '@/ai/flows/extract-keyword-study-tips';
 import { generateQuiz } from '@/ai/flows/generate-quiz';
+import { generateResourceSuggestions } from '@/ai/flows/generate-resource-suggestions';
 import { z } from 'zod';
 
 const studyPlanSchema = z.object({
@@ -139,4 +140,37 @@ export async function generateQuizAction(prevState: any, formData: FormData) {
       data: null,
     };
   }
+}
+
+const suggestionsSchema = z.object({
+  subject: z.string().min(2, { message: 'Subject must be at least 2 characters.' }),
+});
+
+export async function getResourceSuggestionsAction(prevState: any, formData: FormData) {
+    const validatedFields = suggestionsSchema.safeParse({
+        subject: formData.get('subject'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            message: 'Invalid form data.',
+            errors: validatedFields.error.flatten().fieldErrors,
+            data: null,
+        };
+    }
+
+    try {
+        const result = await generateResourceSuggestions({ subject: validatedFields.data.subject });
+        return {
+            message: 'success',
+            errors: null,
+            data: result.suggestions,
+        };
+    } catch (error) {
+        return {
+            message: 'Failed to get resource suggestions. Please try again later.',
+            errors: null,
+            data: null,
+        };
+    }
 }
