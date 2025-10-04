@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileQuestion, CheckCircle, XCircle, ArrowRight, RefreshCw } from 'lucide-react';
+import { FileQuestion, CheckCircle, XCircle, ArrowRight, RefreshCw, Award, ShieldAlert } from 'lucide-react';
 import { quizzes, Question } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { cn } from '@/lib/utils';
 type QuizSystemProps = {
   initialSubject: string;
 }
+
+const PASSING_THRESHOLD = 0.7; // 70%
 
 export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const [selectedSubject, setSelectedSubject] = useState(initialSubject);
@@ -51,8 +53,19 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
     setShowResult(false);
     setScore(0);
   };
-
+  
   const progressPercentage = quiz ? ((currentQuestionIndex + (showResult ? 1 : 0)) / quiz.questions.length) * 100 : 0;
+
+  const isQuizFinished = quiz && currentQuestionIndex === quiz.questions.length;
+  const finalScorePercentage = quiz ? score / quiz.questions.length : 0;
+  const hasPassed = finalScorePercentage >= PASSING_THRESHOLD;
+
+  const difficultyVariant = {
+    'Easy': 'secondary',
+    'Medium': 'outline',
+    'Hard': 'destructive'
+  } as const;
+
 
   return (
     <Card className="h-full shadow-none border-none">
@@ -75,14 +88,14 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {quiz && question ? (
+        {quiz && !isQuizFinished && question ? (
           <>
             <Progress value={progressPercentage} className="mb-4" />
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">
                 Question {currentQuestionIndex + 1} of {quiz.questions.length}
               </p>
-              <Badge variant={question.difficulty === 'Easy' ? 'secondary' : 'destructive'}>{question.difficulty}</Badge>
+              <Badge variant={difficultyVariant[question.difficulty]}>{question.difficulty}</Badge>
             </div>
             <h3 className="font-semibold text-lg mb-4">{question.question}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -111,21 +124,24 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
             </div>
             {showResult && (
               <div className="flex justify-end mt-4">
-                {currentQuestionIndex < quiz.questions.length - 1 ? (
-                  <Button onClick={handleNextQuestion}>
-                    Next Question <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button onClick={resetQuiz}>View Results</Button>
-                )}
+                <Button onClick={handleNextQuestion}>
+                  {currentQuestionIndex < quiz.questions.length - 1 ? "Next Question" : "View Results"} <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-10">
-            <h3 className="font-bold text-2xl">Quiz Complete!</h3>
+          <div className="text-center py-10 flex flex-col items-center">
+            {hasPassed ? (
+                <Award className="h-16 w-16 text-green-500 mb-4" />
+            ) : (
+                <ShieldAlert className="h-16 w-16 text-red-500 mb-4" />
+            )}
+            <h3 className="font-bold text-2xl">
+              {hasPassed ? "Congratulations! You Passed!" : "Good Effort! Keep Studying."}
+            </h3>
             <p className="text-muted-foreground mt-2">
-              You scored {score} out of {quiz?.questions.length || 0}.
+              You scored {score} out of {quiz?.questions.length || 0} ({Math.round(finalScorePercentage * 100)}%).
             </p>
             <Button onClick={resetQuiz} className="mt-6">
               <RefreshCw className="mr-2 h-4 w-4" />
