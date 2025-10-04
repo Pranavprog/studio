@@ -10,14 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Bar, BarChart } from 'recharts';
+import { Bar, BarChart, XAxis } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 
 
 type QuizSystemProps = {
-  initialSubject: string;
+  currentSubject: string;
+  setSubject: (subject: string) => void;
 };
 
 type AnswerRecord = {
@@ -46,8 +47,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-export function QuizSystem({ initialSubject }: QuizSystemProps) {
-  const [subject, setSubject] = useState(initialSubject);
+export function QuizSystem({ currentSubject, setSubject }: QuizSystemProps) {
   const [quiz, setQuiz] = useState<GenerateQuizOutput | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -60,16 +60,15 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    setSubject(initialSubject);
     if(quiz) {
       const formData = new FormData();
-      formData.append('subject', initialSubject);
+      formData.append('subject', currentSubject);
       startTransition(() => {
           formAction(formData);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSubject]);
+  }, [currentSubject]);
 
   useEffect(() => {
     if (state.message === 'success' && state.data) {
@@ -180,7 +179,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                     <Skeleton className="h-6 w-10/12" />
                     <Skeleton className="h-6 w-11/12" />
                 </div>
-                <p className="text-sm text-muted-foreground mt-4">Crafting questions for "{subject}"</p>
+                <p className="text-sm text-muted-foreground mt-4">Crafting questions for "{currentSubject}"</p>
             </div>
         )}
         
@@ -194,7 +193,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                         name="subject"
                         placeholder="e.g., Quantum Physics"
                         required
-                        value={subject}
+                        value={currentSubject}
                         onChange={(e) => setSubject(e.target.value)}
                         className="flex-grow"
                     />
@@ -266,7 +265,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
               {hasPassed ? "Congratulations! You Passed!" : "Good Effort! Keep Studying."}
             </h3>
             <p className="text-muted-foreground mt-2 mb-6">
-              You scored {score} out of {quiz?.questions.length || 0} ({Math.round(finalScorePercentage * 100)}%) on the {subject} quiz.
+              You scored {score} out of {quiz?.questions.length || 0} ({Math.round(finalScorePercentage * 100)}%) on the {currentSubject} quiz.
             </p>
             
             <div className="w-full max-w-md mx-auto space-y-6">

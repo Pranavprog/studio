@@ -32,7 +32,7 @@ export default function Home() {
               </div>
               <div className="flex-1 w-full p-8 bg-card rounded-2xl shadow-lg">
                   <h2 className="text-2xl font-bold text-card-foreground mb-6 flex items-center gap-3"><FileQuestion className="text-primary"/>Test Your Knowledge</h2>
-                    <QuizSystem initialSubject={subject} />
+                    <QuizSystem currentSubject={subject} setSubject={setSubject} />
               </div>
           </div>
           
