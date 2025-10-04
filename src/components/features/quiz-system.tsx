@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { FileQuestion, CheckCircle, XCircle, ArrowRight, RefreshCw, Award, ShieldAlert, BarChart3, Target } from 'lucide-react';
 import { quizzes, Question } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,11 +26,18 @@ const PASSING_THRESHOLD = 0.7; // 70%
 
 export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const [selectedSubject, setSelectedSubject] = useState(initialSubject);
-  const [quiz, setQuiz] = useState(() => quizzes[initialSubject]);
+  const [quiz, setQuiz] = useState(() => quizzes[initialSubject] || quizzes[Object.keys(quizzes)[0]]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+
+  useEffect(() => {
+    if (initialSubject && quizzes[initialSubject]) {
+      handleSubjectChange(initialSubject);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSubject]);
 
   const question: Question | undefined = quiz?.questions[currentQuestionIndex];
 
@@ -53,7 +60,11 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const handleNextQuestion = () => {
     setShowResult(false);
     setSelectedAnswer(null);
-    setCurrentQuestionIndex(prev => prev + 1);
+    if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      setCurrentQuestionIndex(quiz?.questions.length || 0)
+    }
   };
 
   const resetQuiz = () => {
@@ -63,11 +74,11 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
     setAnswers([]);
   };
 
-  const progressPercentage = quiz ? ((currentQuestionIndex + (showResult ? 1 : 0)) / quiz.questions.length) * 100 : 0;
+  const progressPercentage = quiz ? (currentQuestionIndex / quiz.questions.length) * 100 : 0;
 
   const isQuizFinished = quiz && currentQuestionIndex === quiz.questions.length;
   const score = useMemo(() => answers.filter(a => a.isCorrect).length, [answers]);
-  const finalScorePercentage = quiz ? score / quiz.questions.length : 0;
+  const finalScorePercentage = quiz ? (quiz.questions.length > 0 ? score / quiz.questions.length : 0) : 0;
   const hasPassed = finalScorePercentage >= PASSING_THRESHOLD;
 
   const difficultyVariant = {
@@ -108,7 +119,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                 <CardTitle className="text-xl">MCQ Quiz System</CardTitle>
                 <CardDescription>Test your knowledge on different subjects.</CardDescription>
             </div>
-            <Select onValueChange={handleSubjectChange} defaultValue={selectedSubject}>
+            <Select onValueChange={handleSubjectChange} value={selectedSubject}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select a subject" />
                 </SelectTrigger>
