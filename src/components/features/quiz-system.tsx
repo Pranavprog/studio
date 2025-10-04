@@ -55,7 +55,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const progressPercentage = quiz ? ((currentQuestionIndex + (showResult ? 1 : 0)) / quiz.questions.length) * 100 : 0;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>

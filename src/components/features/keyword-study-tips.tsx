@@ -46,7 +46,7 @@ export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubjec
   }
 
   return (
-    <Card>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center gap-3">
           <Lightbulb className="h-6 w-6 text-primary" />
@@ -55,7 +55,7 @@ export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubjec
         <CardDescription>Get AI-generated keywords and study tips for any subject.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={handleFormSubmit} className="flex gap-2 mb-4">
+        <form ref={formRef} action={handleFormSubmit} className="flex gap-2 mb-6">
           <Input 
             name="subject" 
             placeholder="Enter subject" 

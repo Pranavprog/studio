@@ -46,7 +46,7 @@ export function TextSummarizer() {
   }, [state, toast]);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center gap-3">
           <BookText className="h-6 w-6 text-primary" />
@@ -55,13 +55,15 @@ export function TextSummarizer() {
         <CardDescription>Paste a short educational text to get a concise summary.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col h-full">
-        <form ref={formRef} action={formAction} className="space-y-4">
-          <Textarea 
-            name="text"
-            placeholder="Paste your text here... (at least 50 characters)"
-            className="min-h-[150px] flex-grow"
-            required 
-          />
+        <form ref={formRef} action={formAction} className="space-y-4 flex-grow flex flex-col">
+          <div className="flex-grow">
+            <Textarea 
+              name="text"
+              placeholder="Paste your text here... (at least 50 characters)"
+              className="min-h-[150px] h-full"
+              required 
+            />
+          </div>
           {state.errors?.text && <p className="text-sm text-destructive">{state.errors.text[0]}</p>}
           <SubmitButton />
         </form>

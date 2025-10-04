@@ -65,7 +65,7 @@ export function StudyPlanGenerator({ currentSubject, setSubject }: StudyPlanGene
   };
 
   return (
-    <Card>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center gap-3">
           <ClipboardList className="h-6 w-6 text-primary" />

@@ -14,13 +14,13 @@ export function ResourceSuggestions({ subject }: { subject: string }) {
   const suggestedResources = resources[subject] || [];
 
   return (
-    <Card>
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center gap-3">
           <Library className="h-6 w-6 text-primary" />
           <CardTitle>Resource Suggestions</CardTitle>
         </div>
-        <CardDescription>Hand-picked resources to deepen your understanding of {subject}.</CardDescription>
+        <CardDescription>Hand-picked resources for {subject}.</CardDescription>
       </CardHeader>
       <CardContent>
         {suggestedResources.length > 0 ? (
@@ -41,7 +41,7 @@ export function ResourceSuggestions({ subject }: { subject: string }) {
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No specific resources found for "{subject}". Try a broader topic like 'Physics' or 'Biology'.
+            No specific resources found for "{subject}". Try a broader topic.
           </p>
         )}
       </CardContent>
