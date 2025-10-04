@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { getKeywordsAndTipsAction } from '@/app/actions';
 import { Separator } from '../ui/separator';
+import { Skeleton } from '../ui/skeleton';
 
 const initialState = {
   message: '',
@@ -34,16 +35,13 @@ export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubjec
   }, [state, toast]);
   
   useEffect(() => {
-    const form = formRef.current;
-    if (form) {
-        const formData = new FormData(form);
-        if (!formData.get('subject')) {
-            // If there's no subject, don't submit on initial load
-            return;
+    if (formRef.current) {
+        const formData = new FormData(formRef.current);
+        if (formData.get('subject')) {
+            startTransition(() => {
+                formAction(formData);
+            });
         }
-        startTransition(() => {
-            formAction(formData);
-        });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -78,20 +76,25 @@ export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubjec
         </form>
 
         {isPending && (
-          <div className="space-y-4">
+          <div className="space-y-6 animate-pulse">
             <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Keywords</p>
+                <Skeleton className="h-5 w-24" />
                 <div className="flex flex-wrap gap-2">
-                    <div className="h-6 w-20 animate-pulse rounded-full bg-muted"></div>
-                    <div className="h-6 w-24 animate-pulse rounded-full bg-muted"></div>
-                    <div className="h-6 w-16 animate-pulse rounded-full bg-muted"></div>
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-6 w-28 rounded-full" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
                 </div>
             </div>
+             <Separator />
             <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Study Tips</p>
-                 <div className="h-5 w-full animate-pulse rounded-md bg-muted"></div>
-                 <div className="h-5 w-10/12 animate-pulse rounded-md bg-muted"></div>
+                <Skeleton className="h-5 w-24" />
+                 <div className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-10/12" />
+                    <Skeleton className="h-5 w-11/12" />
+                 </div>
             </div>
+            <p className="text-sm text-muted-foreground text-center">Finding the best tips for you...</p>
           </div>
         )}
 

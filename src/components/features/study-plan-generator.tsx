@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { generateStudyPlanAction } from '@/app/actions';
+import { Skeleton } from '../ui/skeleton';
 
 const initialState = {
   message: '',
@@ -20,7 +21,7 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+    <Button type="submit" disabled={pending} className="w-full">
       {pending ? <Loader2 className="animate-spin" /> : 'Generate Plan'}
     </Button>
   );
@@ -33,11 +34,12 @@ type StudyPlanGeneratorProps = {
 
 export function StudyPlanGenerator({ currentSubject, setSubject }: StudyPlanGeneratorProps) {
   const [state, formAction] = useActionState(generateStudyPlanAction, initialState);
+  const { pending } = useFormStatus();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.message === 'success') {
+    if (state.message === 'success' && state.data) {
       toast({
         title: 'Success!',
         description: 'Your study plan has been generated.',
@@ -91,6 +93,19 @@ export function StudyPlanGenerator({ currentSubject, setSubject }: StudyPlanGene
           </div>
           <SubmitButton />
         </form>
+
+        {pending && !state.data && (
+          <div className="mt-4 pt-4 border-t">
+            <Skeleton className="h-6 w-1/3 mb-3" />
+            <div className="space-y-2">
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-10/12" />
+                <Skeleton className="h-5 w-11/12" />
+            </div>
+            <p className="text-sm text-muted-foreground mt-2 animate-pulse">Generating your personalized plan...</p>
+          </div>
+        )}
+
         {state.data && (
            <Button variant="outline" className="w-full mt-4" onClick={handleDownload}>
             <Download className="mr-2 h-4 w-4" />

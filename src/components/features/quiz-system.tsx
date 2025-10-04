@@ -10,9 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 
 type QuizSystemProps = {
@@ -81,6 +82,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
         variant: 'destructive',
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, toast]);
 
   const question: Question | undefined = quiz?.questions[currentQuestionIndex];
@@ -167,7 +169,22 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
         <CardDescription>Generate a multiple-choice quiz on any subject.</CardDescription>
       </CardHeader>
       <CardContent>
-        {!quiz && (
+        {isPending && !quiz && (
+            <div className='text-center py-10'>
+                <div className='flex items-center justify-center gap-2 mb-4'>
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <p className="text-lg font-semibold text-muted-foreground animate-pulse">Generating your quiz...</p>
+                </div>
+                <div className='space-y-3 max-w-sm mx-auto'>
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-10/12" />
+                    <Skeleton className="h-6 w-11/12" />
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">Crafting questions for "{subject}"</p>
+            </div>
+        )}
+        
+        {!quiz && !isPending && (
              <div className='flex flex-col items-center justify-center text-center py-10'>
                 <BrainCircuit className="h-16 w-16 text-muted-foreground/50 mb-4" />
                 <h3 className="font-bold text-2xl mb-2">Generate Your Quiz</h3>
@@ -187,13 +204,6 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                 </form>
                 {state.errors?.subject && <p className="text-sm text-destructive mt-2">{state.errors.subject[0]}</p>}
              </div>
-        )}
-
-        {isPending && !quiz && (
-            <div className='text-center py-10'>
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">Generating your quiz on "{subject}"...</p>
-            </div>
         )}
 
         {quiz && !isQuizFinished && question && (

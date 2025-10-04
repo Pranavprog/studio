@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { BookText, Loader2 } from 'lucide-react';
+import { BookText, Loader2, Sparkles } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { summarizeTextAction } from '@/app/actions';
+import { Skeleton } from '../ui/skeleton';
 
 const initialState = {
   message: '',
@@ -20,18 +21,26 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full">
-      {pending ? <Loader2 className="animate-spin" /> : 'Summarize Text'}
+      {pending ? (
+        <>
+          <Loader2 className="animate-spin mr-2" />
+          Summarizing...
+        </>
+      ) : (
+        'Summarize Text'
+      )}
     </Button>
   );
 }
 
 export function TextSummarizer() {
   const [state, formAction] = useActionState(summarizeTextAction, initialState);
+  const { pending } = useFormStatus();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.message === 'success') {
+    if (state.message === 'success' && state.data) {
       toast({
         title: 'Text Summarized!',
         description: 'Your summary is ready below.',
@@ -64,6 +73,19 @@ export function TextSummarizer() {
           {state.errors?.text && <p className="text-sm text-destructive">{state.errors.text[0]}</p>}
           <SubmitButton />
         </form>
+
+        {pending && !state.data && (
+            <div className="mt-4 pt-4 border-t">
+                 <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="text-primary animate-pulse" />
+                    <Skeleton className="h-6 w-1/3" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-10/12" />
+                </div>
+            </div>
+        )}
 
         {state.data && (
           <div className="mt-4 pt-4 border-t">
