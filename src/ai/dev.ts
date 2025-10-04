@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/generate-study-plan.ts';
+import '@/ai/flows/summarize-educational-text.ts';
+import '@/ai/flows/extract-keyword-study-tips.ts';
