@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useRef, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { ClipboardList, Download, Loader2 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +32,7 @@ type StudyPlanGeneratorProps = {
 };
 
 export function StudyPlanGenerator({ currentSubject, setSubject }: StudyPlanGeneratorProps) {
-  const [state, formAction] = useFormState(generateStudyPlanAction, initialState);
+  const [state, formAction] = useActionState(generateStudyPlanAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 

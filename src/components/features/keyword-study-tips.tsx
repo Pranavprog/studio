@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useTransition } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useRef, useTransition, useActionState } from 'react';
 import { Lightbulb, Loader2 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +18,7 @@ const initialState = {
 };
 
 export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubject: string, setSubject: (subject: string) => void }) {
-  const [state, formAction] = useFormState(getKeywordsAndTipsAction, initialState);
+  const [state, formAction] = useActionState(getKeywordsAndTipsAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
