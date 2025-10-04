@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -32,6 +32,18 @@ const initialState = {
     errors: null,
     data: null,
 };
+
+const chartConfig = {
+  correct: {
+    label: 'Correct',
+    color: 'hsl(var(--primary))',
+  },
+  incorrect: {
+    label: 'Incorrect',
+    color: 'hsl(var(--destructive) / 0.5)',
+  },
+} satisfies ChartConfig;
+
 
 export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const [subject, setSubject] = useState(initialSubject);
@@ -243,18 +255,23 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                  <div className="p-4 border rounded-lg bg-background">
                      <h4 className="font-semibold text-lg mb-2 flex items-center gap-2 justify-center"><BarChart3/>Performance by Difficulty</h4>
                     <div className="h-[200px] w-full">
-                        <ResponsiveContainer>
-                             <BarChart data={resultsByDifficulty}>
-                                 <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
-                                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
-                                <Tooltip
-                                    content={<ChartTooltipContent />}
-                                    cursor={{fill: 'hsl(var(--muted))'}}
-                                />
-                                 <Bar dataKey="correct" stackId="a" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                 <Bar dataKey="incorrect" stackId="a" fill="hsl(var(--destructive) / 0.5)" radius={[4, 4, 0, 0]} />
-                             </BarChart>
-                        </ResponsiveContainer>
+                       <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                          <BarChart accessibilityLayer data={resultsByDifficulty}>
+                            <XAxis
+                              dataKey="name"
+                              tickLine={false}
+                              tickMargin={10}
+                              axisLine={false}
+                              tickFormatter={(value) => value.slice(0, 3)}
+                            />
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent indicator="dashed" />}
+                            />
+                            <Bar dataKey="correct" stackId="a" fill="var(--color-correct)" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="incorrect" stackId="a" fill="var(--color-incorrect)" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ChartContainer>
                     </div>
                  </div>
 
