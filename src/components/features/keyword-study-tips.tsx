@@ -3,7 +3,7 @@
 import { useEffect, useRef, useTransition, useActionState } from 'react';
 import { Lightbulb, Loader2 } from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,28 +34,36 @@ export function KeywordStudyTips({ currentSubject, setSubject }: { currentSubjec
   }, [state, toast]);
   
   useEffect(() => {
-    if(formRef.current) {
-        formRef.current.requestSubmit();
+    const form = formRef.current;
+    if (form) {
+        const formData = new FormData(form);
+        if (!formData.get('subject')) {
+            // If there's no subject, don't submit on initial load
+            return;
+        }
+        startTransition(() => {
+            formAction(formData);
+        });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFormSubmit = (formData: FormData) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     startTransition(() => {
       formAction(formData);
     });
   }
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="shadow-none border-none h-full">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <Lightbulb className="h-6 w-6 text-primary" />
-          <CardTitle>Keyword Study Tips</CardTitle>
-        </div>
-        <CardDescription>Get AI-generated keywords and study tips for any subject.</CardDescription>
+        <CardTitle className="text-xl">Keyword Study Tips</CardTitle>
+        <CardDescription>AI-generated keywords and study tips for any subject.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={handleFormSubmit} className="flex gap-2 mb-6">
+        <form ref={formRef} onSubmit={handleFormSubmit} className="flex gap-2 mb-6">
           <Input 
             name="subject" 
             placeholder="Enter subject" 

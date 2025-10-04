@@ -55,14 +55,11 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
   const progressPercentage = quiz ? ((currentQuestionIndex + (showResult ? 1 : 0)) / quiz.questions.length) * 100 : 0;
 
   return (
-    <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="h-full shadow-none border-none">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                <div className="flex items-center gap-3">
-                    <FileQuestion className="h-6 w-6 text-primary" />
-                    <CardTitle>MCQ Quiz System</CardTitle>
-                </div>
+                <CardTitle className="text-xl">MCQ Quiz System</CardTitle>
                 <CardDescription>Test your knowledge on different subjects.</CardDescription>
             </div>
             <Select onValueChange={handleSubjectChange} defaultValue={selectedSubject}>
@@ -98,8 +95,8 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                     variant="outline"
                     className={cn(
                       "h-auto justify-start text-left whitespace-normal py-3",
-                      showResult && isCorrect && "bg-green-100 border-green-500 text-green-900 hover:bg-green-200",
-                      showResult && isSelected && !isCorrect && "bg-red-100 border-red-500 text-red-900 hover:bg-red-200",
+                      showResult && isCorrect && "bg-green-100 border-green-500 text-green-900 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-200 dark:border-green-700",
+                      showResult && isSelected && !isCorrect && "bg-red-100 border-red-500 text-red-900 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700",
                       !showResult && "hover:bg-accent/50"
                     )}
                     onClick={() => handleAnswerSelect(option)}

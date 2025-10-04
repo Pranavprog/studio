@@ -14,12 +14,9 @@ export function ResourceSuggestions({ subject }: { subject: string }) {
   const suggestedResources = resources[subject] || [];
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="shadow-none border-none h-full">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <Library className="h-6 w-6 text-primary" />
-          <CardTitle>Resource Suggestions</CardTitle>
-        </div>
+        <CardTitle className="text-xl">Resource Suggestions</CardTitle>
         <CardDescription>Hand-picked resources for {subject}.</CardDescription>
       </CardHeader>
       <CardContent>

@@ -65,12 +65,9 @@ export function StudyPlanGenerator({ currentSubject, setSubject }: StudyPlanGene
   };
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="shadow-none border-none">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <ClipboardList className="h-6 w-6 text-primary" />
-          <CardTitle>Study Plan Generator</CardTitle>
-        </div>
+        <CardTitle className="text-xl">Study Plan Generator</CardTitle>
         <CardDescription>Enter a subject and total study hours to generate a downloadable CSV plan.</CardDescription>
       </CardHeader>
       <CardContent>

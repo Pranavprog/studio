@@ -46,12 +46,9 @@ export function TextSummarizer() {
   }, [state, toast]);
 
   return (
-    <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="h-full shadow-none border-none">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <BookText className="h-6 w-6 text-primary" />
-          <CardTitle>Text Summarizer</CardTitle>
-        </div>
+        <CardTitle className="text-xl">Text Summarizer</CardTitle>
         <CardDescription>Paste a short educational text to get a concise summary.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col h-full">
