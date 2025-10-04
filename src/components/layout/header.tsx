@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggleButton } from './theme-toggle-button';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -21,7 +22,7 @@ export function Header() {
           <BrainCircuit className="h-6 w-6 text-primary" />
           <span className="font-bold font-headline text-lg">AI Study Pal</span>
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-4 text-sm flex-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -35,6 +36,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <ThemeToggleButton />
       </div>
     </header>
   );
