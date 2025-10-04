@@ -1,20 +1,23 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { FileQuestion, CheckCircle, XCircle, ArrowRight, RefreshCw, Award, ShieldAlert, BarChart3, Target } from 'lucide-react';
-import { quizzes, Question } from '@/lib/data';
+import { useState, useMemo, useEffect, useTransition, useActionState, useRef } from 'react';
+import { FileQuestion, CheckCircle, XCircle, ArrowRight, RefreshCw, Award, ShieldAlert, BarChart3, Target, BrainCircuit, Loader2 } from 'lucide-react';
+import { type Question, type GenerateQuizOutput } from '@/ai/flows/generate-quiz';
+import { generateQuizAction } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { useToast } from '@/hooks/use-toast';
+
 
 type QuizSystemProps = {
   initialSubject: string;
-}
+};
 
 type AnswerRecord = {
   question: Question;
@@ -24,28 +27,51 @@ type AnswerRecord = {
 
 const PASSING_THRESHOLD = 0.7; // 70%
 
+const initialState = {
+    message: '',
+    errors: null,
+    data: null,
+};
+
 export function QuizSystem({ initialSubject }: QuizSystemProps) {
-  const [selectedSubject, setSelectedSubject] = useState(initialSubject);
-  const [quiz, setQuiz] = useState(() => quizzes[initialSubject] || quizzes[Object.keys(quizzes)[0]]);
+  const [subject, setSubject] = useState(initialSubject);
+  const [quiz, setQuiz] = useState<GenerateQuizOutput | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
 
+  const [state, formAction] = useActionState(generateQuizAction, initialState);
+  const [isPending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
-    if (initialSubject && quizzes[initialSubject]) {
-      handleSubjectChange(initialSubject);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSubject(initialSubject);
   }, [initialSubject]);
+
+  useEffect(() => {
+    if (state.message === 'success' && state.data) {
+      setQuiz(state.data);
+      resetQuiz(state.data);
+    } else if (state.message && state.message !== 'Invalid form data.') {
+      toast({
+        title: 'Error Generating Quiz',
+        description: state.message,
+        variant: 'destructive',
+      });
+    }
+  }, [state, toast]);
 
   const question: Question | undefined = quiz?.questions[currentQuestionIndex];
 
-  const handleSubjectChange = (subject: string) => {
-    setSelectedSubject(subject);
-    setQuiz(quizzes[subject]);
-    resetQuiz();
-  };
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startTransition(() => {
+        formAction(formData);
+    });
+  }
 
   const handleAnswerSelect = (option: string) => {
     if (showResult) return;
@@ -63,15 +89,18 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
     if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
-      setCurrentQuestionIndex(quiz?.questions.length || 0)
+      setCurrentQuestionIndex(quiz?.questions.length || 0);
     }
   };
 
-  const resetQuiz = () => {
+  const resetQuiz = (newQuiz: GenerateQuizOutput | null = null) => {
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setShowResult(false);
     setAnswers([]);
+    if(!newQuiz) {
+        setQuiz(null);
+    }
   };
 
   const progressPercentage = quiz ? (currentQuestionIndex / quiz.questions.length) * 100 : 0;
@@ -114,25 +143,40 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
   return (
     <Card className="h-full shadow-none border-none">
       <CardHeader>
-        <div className="flex justify-between items-start">
-            <div>
-                <CardTitle className="text-xl">MCQ Quiz System</CardTitle>
-                <CardDescription>Test your knowledge on different subjects.</CardDescription>
-            </div>
-            <Select onValueChange={handleSubjectChange} value={selectedSubject}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select a subject" />
-                </SelectTrigger>
-                <SelectContent>
-                    {Object.keys(quizzes).map(key => (
-                        <SelectItem key={key} value={key}>{key}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
+        <CardTitle className="text-xl">AI-Generated Quiz</CardTitle>
+        <CardDescription>Generate a multiple-choice quiz on any subject.</CardDescription>
       </CardHeader>
       <CardContent>
-        {quiz && !isQuizFinished && question ? (
+        {!quiz && (
+             <div className='flex flex-col items-center justify-center text-center py-10'>
+                <BrainCircuit className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h3 className="font-bold text-2xl mb-2">Generate Your Quiz</h3>
+                <p className="text-muted-foreground mb-6 max-w-sm">Enter a subject below to create a custom 10-question quiz with AI.</p>
+                <form ref={formRef} onSubmit={handleFormSubmit} className="flex gap-2 w-full max-w-sm">
+                    <Input
+                        name="subject"
+                        placeholder="e.g., Quantum Physics"
+                        required
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        className="flex-grow"
+                    />
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? <Loader2 className="animate-spin" /> : 'Generate'}
+                    </Button>
+                </form>
+                {state.errors?.subject && <p className="text-sm text-destructive mt-2">{state.errors.subject[0]}</p>}
+             </div>
+        )}
+
+        {isPending && !quiz && (
+            <div className='text-center py-10'>
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">Generating your quiz on "{subject}"...</p>
+            </div>
+        )}
+
+        {quiz && !isQuizFinished && question && (
           <>
             <Progress value={progressPercentage} className="mb-4" />
             <div className="flex justify-between items-center mb-4">
@@ -174,7 +218,9 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
               </div>
             )}
           </>
-        ) : (
+        )}
+
+        {isQuizFinished && (
           <div className="text-center py-10 flex flex-col items-center">
             <div className='flex items-center justify-center mb-4'>
                 {hasPassed ? (
@@ -190,7 +236,7 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
               {hasPassed ? "Congratulations! You Passed!" : "Good Effort! Keep Studying."}
             </h3>
             <p className="text-muted-foreground mt-2 mb-6">
-              You scored {score} out of {quiz?.questions.length || 0} ({Math.round(finalScorePercentage * 100)}%).
+              You scored {score} out of {quiz?.questions.length || 0} ({Math.round(finalScorePercentage * 100)}%) on the {subject} quiz.
             </p>
             
             <div className="w-full max-w-md mx-auto space-y-6">
@@ -218,9 +264,9 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
                  </div>
             </div>
 
-            <Button onClick={resetQuiz} className="mt-8">
+            <Button onClick={() => resetQuiz()} className="mt-8">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              Generate New Quiz
             </Button>
           </div>
         )}

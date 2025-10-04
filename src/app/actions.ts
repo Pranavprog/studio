@@ -3,6 +3,7 @@
 import { generateStudyPlan } from '@/ai/flows/generate-study-plan';
 import { summarizeEducationalText } from '@/ai/flows/summarize-educational-text';
 import { extractKeywordStudyTips } from '@/ai/flows/extract-keyword-study-tips';
+import { generateQuiz } from '@/ai/flows/generate-quiz';
 import { z } from 'zod';
 
 const studyPlanSchema = z.object({
@@ -100,6 +101,40 @@ export async function getKeywordsAndTipsAction(prevState: any, formData: FormDat
   } catch (error) {
     return {
       message: 'Failed to get tips. Please try again later.',
+      errors: null,
+      data: null,
+    };
+  }
+}
+
+const quizSchema = z.object({
+  subject: z.string().min(2, { message: 'Subject must be at least 2 characters.' }),
+});
+
+export async function generateQuizAction(prevState: any, formData: FormData) {
+  const validatedFields = quizSchema.safeParse({
+    subject: formData.get('subject'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      message: 'Invalid form data.',
+      errors: validatedFields.error.flatten().fieldErrors,
+      data: null,
+    };
+  }
+  
+  try {
+    const result = await generateQuiz(validatedFields.data);
+    return {
+      message: 'success',
+      errors: null,
+      data: result,
+    };
+  } catch (error) {
+    console.error('Quiz generation failed:', error);
+    return {
+      message: 'Failed to generate quiz. Please try a different subject or try again later.',
       errors: null,
       data: null,
     };
