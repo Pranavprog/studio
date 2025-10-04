@@ -10,8 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -60,6 +60,14 @@ export function QuizSystem({ initialSubject }: QuizSystemProps) {
 
   useEffect(() => {
     setSubject(initialSubject);
+    if(quiz) {
+      const formData = new FormData();
+      formData.append('subject', initialSubject);
+      startTransition(() => {
+          formAction(formData);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSubject]);
 
   useEffect(() => {
